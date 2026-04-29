@@ -50,7 +50,12 @@ jobs:
               --parameters 'commands=[
                 aws s3 cp s3://'${S3_BUCKET}'/releases/deploy-latest.zip /tmp/d.zip,
                 unzip -o /tmp/d.zip -d '${DEPLOY_DIR}',
+                cp '${DEPLOY_DIR}/frontend/index.html' '${DEPLOY_DIR}',
+                cp '${DEPLOY_DIR}' /opt/app/
                 nginx -t && systemctl reload nginx,
+                chmod +x /opt/app/gradlew,
+                /opt/app/gradlew bootJar,
+                java -jar /opt/app/build/lib/inventory-app.jar
                 curl -sf http://localhost]' \
               --timeout-seconds 300 \
               --query Command.CommandId --output text)
