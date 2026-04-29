@@ -26,7 +26,7 @@ jobs:
       - name: Package & S3 upload
         run: |
           SHORT_SHA="${GITHUB_SHA::7}"
-          sed -i "s|배포 버전: [^<]*|배포 버전: ${SHORT_SHA}|g" index.html || true
+          sed -i "s|배포 버전: [^<]*|배포 버전: ${SHORT_SHA}|g" frontend/index.html || true
           zip -r deploy-${GITHUB_SHA}.zip . --exclude '*.git*' --exclude '.github/*'
           aws s3 cp deploy-${GITHUB_SHA}.zip s3://${S3_BUCKET}/releases/deploy-${GITHUB_SHA}.zip
           aws s3 cp deploy-${GITHUB_SHA}.zip s3://${S3_BUCKET}/releases/deploy-latest.zip
