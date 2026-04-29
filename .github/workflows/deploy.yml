@@ -65,6 +65,7 @@ jobs:
                 cd /opt/app/,
                 gradlew bootJar,
                 export $(cat .env | xargs) && java -jar build/libs/inventory-app.jar &,
+                sleep 30,
                 curl -sf http://localhost:8080/actuator/health]' \
               --timeout-seconds 300 \
               --query Command.CommandId --output text)
