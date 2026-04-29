@@ -51,12 +51,21 @@ jobs:
                 aws s3 cp s3://'${S3_BUCKET}'/releases/deploy-latest.zip /tmp/d.zip,
                 unzip -o /tmp/d.zip -d '${DEPLOY_DIR}',
                 cp '${DEPLOY_DIR}/frontend/index.html' '${DEPLOY_DIR}',
-                cp '${DEPLOY_DIR}' /opt/app/
+                cp -rf '${DEPLOY_DIR}/*' /opt/app/
                 nginx -t && systemctl reload nginx,
                 chmod +x /opt/app/gradlew,
-                /opt/app/gradlew bootJar,
-                java -jar /opt/app/build/lib/inventory-app.jar
-                curl -sf http://localhost]' \
+                sudo tee /opt/app/.env <<'ENVEOF'
+                  DB_HOST=${secrets.AWS_RDS}
+                  DB_PORT=3306
+                  DB_USER=${secrets.AWS_RDS_USER}
+                  DB_PASS=${secrets.AWS_RDS_PASSWD}
+                  SERVER_PORT=8080
+                  CORS_ORIGINS=${secrets.ALB_DNS}
+                  ENVEOF,
+                cd /opt/app/,
+                gradlew bootJar,
+                export $(cat .env | xargs) && java -jar build/libs/inventory-app.jar &,
+                curl -sf http://localhost:8080/actuator/health]' \
               --timeout-seconds 300 \
               --query Command.CommandId --output text)
             for i in $(seq 1 30); do
